@@ -1,8 +1,15 @@
 import streamlit as st
+from langchain_core.messages import HumanMessage
+
+# lets import chatbot
+from langgraph_chat_backend import chatbot # how we imported a variable ? object ? 
+
+# defining the config
+
+config = {'configurable': {'thread_id': 'thread-1'}}
 
 
 # st,session_state :) a dict
-
 if 'message_history' not in st.session_state:
     st.session_state['message_history'] = [] 
 
@@ -28,9 +35,17 @@ if user_input:
     with st.chat_message('user'):
         st.text(user_input)
 
-    st.session_state['message_history'].append({'role':'assistant', 'content': user_input})
+
+    response = chatbot.invoke({'messages': [HumanMessage(content=user_input)]}, config=config)       # need input as initial state 
+    ai_message = response['messages'][-1].content
+
+    st.session_state['message_history'].append({'role':'assistant', 'content': ai_message})
     with st.chat_message('asistant'):
-        st.text(user_input)
+        st.text(ai_message)
+
+    # st.session_state['message_history'].append({'role':'assistant', 'content': user_input})
+    # with st.chat_message('asistant'):
+    #     st.text(user_input)
 
 
 
