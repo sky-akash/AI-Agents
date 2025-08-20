@@ -4,18 +4,38 @@ from langchain_core.messages import HumanMessage
 # lets import chatbot
 from langgraph_chat_backend import chatbot                         # how we imported a variable ? object ? we can if it is at top level
 
+import uuid            # helps to generate random id
+
+####################### Utility function 1 #######################
+
+def generate_thread_id():
+    thread_id = uuid.uuid4()
+    return thread_id            # generates a random thread id, now we have to add it to the session setup
+
 # defining the config
-config = {'configurable': {'thread_id': 'thread-1'}}
+# CONFIG = {'configurable': {'thread_id': 'thread-1'}}
 
 ############################################### Session Setup ##############################################
 # st,session_state :) a dict
 if 'message_history' not in st.session_state:
     st.session_state['message_history'] = [] 
 
+if 'thread_id' not in st.session_state:
+    st.session_state['thread_id'] = generate_thread_id() # if not generatea then generating a thread id
+
 # need to store history in a dictionary
 
 # message_history = []
 
+############ starting with sidebar
+
+st.sidebar.title("Gemini pe aadharit LangGrapgh ka chatbot")
+
+st.sidebar.button("Nayi Kahani?")
+
+st.sidebar.header("Humari Baatcheet")
+
+st.sidebar.text(st.session_state['thread_id'])
 ############################################### Main Code ##############################################
 
 # loading conv. history
@@ -36,13 +56,14 @@ if user_input:
     with st.chat_message('user'):
         st.text(user_input)
 
+    CONFIG = {'configurable': {'thread_id': st.session_state['thread_id']}}
 
     with st.chat_message('assistant'):
 
         ai_message = st.write_stream(
             message_chunk.content for message_chunk, metadata in chatbot.stream(     # python generator
                 {'messages': [HumanMessage(content=user_input)]},
-                config = {'configurable': {'thread_id': 'thread-1'}},
+                config = CONFIG,
                 stream_mode = 'messages'
             )
         )
